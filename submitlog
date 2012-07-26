@@ -1,0 +1,28 @@
+#!/bin/bash
+
+# This script checks a submission log for a particular string.
+# Yes, it's just a shortcut to grep. (mostly)
+# Giving a -u finds Unique entires, then counts them for you (ineffeciently, but effectively)
+#
+# by Mark Sherman, msherman@cs.uml.edu
+
+LOGFILE=~/submit/submit.log
+
+# Process arguments
+while getopts "u" Option
+do
+    case $Option in
+	u) UNIQUE=1 ;;
+#	s) s=$OPTARG ;; left as an example case
+    esac
+done
+shift $(($OPTIND -1))
+
+if [ $UNIQUE ]
+then
+	grep $1 $LOGFILE | cut -c 26- | sort | uniq
+	grep $1 $LOGFILE | cut -c 26- | sort | uniq | wc -l
+else
+	grep $1 $LOGFILE
+fi
+	

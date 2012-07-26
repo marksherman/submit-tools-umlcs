@@ -1,0 +1,86 @@
+#! /usr/bin/env python
+
+# This script provides feedback to students on their assignments.                          
+# Sends email to the student based on their username.
+# The assignments folder is assumed to be organized:
+#  root/assignment/student/files                               
+#                                                                               
+# by Mark Sherman, msherman@cs.uml.edu 
+#
+# r2012.02.22 - added file permission change for feedback file
+# r0 - initial release                                        
+
+import os
+import grp
+import stat
+import smtplib
+from email.mime.text import MIMEText
+import subprocess
+import argparse
+import datetime
+
+EDITOR = 'vim'
+#EDITOR = 'emacs +4:9'
+FEEDBACKFILE = 'feedback.txt'
+
+GID = grp.getgrnam('91101ta').gr_gid
+MOD = stat.S_IRWXU | stat.S_IRWXG
+
+parser = argparse.ArgumentParser(description='Prepare feedback for an assignment and email that feedback to the student.')
+parser.add_argument('-g', dest="grade", metavar="grade",
+	help='specify a grade')
+parser.add_argument('-n', '--no-email', action='store_false', dest='do_email', 
+	help='do not send email')
+parser.add_argument('-j', '--no-edit', action='store_false', dest='do_edit', 
+	help='\"just do it,\" do not edit feedback file')
+parser.add_argument('files', nargs="*", 
+	help="files to be included for markup")
+args = parser.parse_args()
+
+# Figure out assignment/student from current directory
+wd=os.getcwd().split('/')
+
+assignment = wd[ len(wd) - 2 ]
+student = wd[ len(wd) - 1 ]
+
+# Create message text based from template, possibly including other files
+fout = open(FEEDBACKFILE, 'w')
+fout.write('Student: ' + student + 
+	'\nAssignment: ' + assignment +
+	'\nDate: ' + str(datetime.datetime.now()) +
+	'\nGrade: ')
+if args.grade != None:
+	fout.write(args.grade)
+fout.write('\n\n')
+
+for x in args.files:
+	fout.write('========== ' + x + ' ==========\n')
+	f = open(x, 'r')
+	fout.write(f.read() + '\n')
+	f.close()
+
+fout.close()
+
+# Launch an editor to add markup.
+if args.do_edit:
+	subprocess.call([EDITOR, '+4', FEEDBACKFILE])
+
+f = open(FEEDBACKFILE, 'r')
+msg = MIMEText(f.read())
+
+sender = "msherman@cs.uml.edu"
+recip = student
+
+msg['Subject'] = "Computing I feedback: " + assignment
+msg['From'] = sender
+msg['To'] = recip
+
+if args.do_email:
+	s = smtplib.SMTP('localhost')
+	s.sendmail(sender, recip, msg.as_string())
+	s.quit()
+	print "Email sent to " + student
+
+# Clean up and change permissions
+os.chown( FEEDBACKFILE , -1 , GID)
+os.chmod( FEEDBACKFILE , MOD )
