@@ -33,3 +33,8 @@ These scripts depend on two major assumptions:
 
 The scripts then expect you to have a different directory, the DST, where you want the student work expanded to, 
 structured as such: DST/assignment_name/student_name/files*
+
+## How to Use
+Scripts should be placed in a folder within your home directory on the server. This folder must be added to your PATH.
+I recommend ~/bin/ as the folder to put them in.
+Each script has usage described in their header.
