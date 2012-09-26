@@ -34,6 +34,12 @@ These scripts depend on two major assumptions:
 The scripts then expect you to have a different directory, the DST, where you want the student work expanded to, 
 structured as such: DST/assignment_name/student_name/files*
 
+## Extra Scripts (generally helpful)
+"allw" and "allf" conduct the 'w' and 'f' commands across a series of linux hosts. This is useful to take a little peek 
+at who is logged in to a set of development servers. This peek was easy when everyone used the same big server, 
+simply with the 'w' and 'f' commands, but in today's distributed environments, you need to check each server individually.
+These scripts automate the process.
+
 ## How to Use
 Scripts should be placed in a folder within your home directory on the server. This folder must be added to your PATH.
 I recommend ~/bin/ as the folder to put them in.
